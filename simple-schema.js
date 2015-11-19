@@ -453,8 +453,12 @@ SimpleSchema = function(schemas, options) {
 
   _.each(self._schema, function(definition, fieldName) {
     // Validate the field definition
-    if (!Match.test(definition, schemaDefinition)) {
-      throw new Error('Invalid definition for ' + fieldName + ' field.');
+    try {
+      check(definition, schemaDefinition);
+    } catch (err) {
+      console.log('definition', definition);
+      err.message = 'Invalid definition for ' + fieldName + ': field.' + err.message;
+      throw err;
     }
 
     fieldNameRoot = fieldName.split(".")[0];
@@ -513,6 +517,8 @@ SimpleSchema.extendOptions = function(options) {
   _.extend(schemaDefinition, options);
 };
 
+// globalize definition to test available schema keys
+SimpleSchema.schemaDefinition = schemaDefinition;
 // this domain regex matches all domains that have at least one .
 // sadly IPv4 Adresses will be caught too but technically those are valid domains
 // this expression is extracted from the original RFC 5322 mail expression
